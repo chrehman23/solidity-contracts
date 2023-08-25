@@ -24,12 +24,24 @@ contract ContractB {
         (bool success, bytes memory data) = address(_contractAddress).call{value:msg.value}(methodWithData);
        return (success, data);
     }
-    //this willupdate your local file
+
+    // ***************deligate types *************************
+    //this will update your local file
     function delegatecall(
         address _contractAddress,
         uint256 _num
     ) public payable returns (bool, bytes memory) {
          bytes memory methodWithData = abi.encodeWithSignature("updateValue(uint256)", _num);
+        (bool success, bytes memory data) = _contractAddress.delegatecall(methodWithData);
+        return (success, data);
+    }
+
+    //this will update your local file with another way of selector
+    function delegatecallWithSelector(
+        address _contractAddress,
+        uint256 _num
+    ) public payable returns (bool, bytes memory) {
+         bytes memory methodWithData = abi.encodeWithSelector(ContractA.updateValue.selector,_num);
         (bool success, bytes memory data) = _contractAddress.delegatecall(methodWithData);
         return (success, data);
     }
