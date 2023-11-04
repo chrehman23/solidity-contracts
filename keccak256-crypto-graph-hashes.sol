@@ -21,4 +21,8 @@ contract contractA {
     function collision( string memory text,uint256 x,string memory text2) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(text, x, text2));
     }
+
+    function concatinateStrings( string memory text,string memory text2) public pure returns (string memory) {
+        return string(abi.encodePacked(text, text2));
+    }
 }
