@@ -26,3 +26,5 @@ contract EtherPriceConsumer {
 
 //mumbai testnet geth ether price in wei
 //You can convert next then in to any value its rounded value might me it will alwasy grater then live value.
+
+//mumbai test net deployed contract address 0xfEEB142aE58E961425370A79C1F12E4BCE4Dcc54
