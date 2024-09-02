@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+contract Contract {
+    string[] public value = ["rehman", "ali"];
+
+    function updateValueWithStorage() view public {
+        string[] memory newValue = value;
+        newValue[0] = "assss";
+    }
+
+    function updateValueWtithStorage() public {
+        string[] storage newValue = value;
+        newValue[0] = "asaaass";
+    }
+}
