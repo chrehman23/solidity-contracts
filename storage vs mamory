@@ -5,12 +5,12 @@ contract Contract {
     string[] public value = ["rehman", "ali"];
 
     function updateValueWithStorage() view public {
-        string[] memory newValue = value;
+        string[] memory newValue = value; //this will not change state of the contract because this can only run in ram.
         newValue[0] = "assss";
     }
 
     function updateValueWtithStorage() public {
-        string[] storage newValue = value;
+        string[] storage newValue = value; //this will change state value .
         newValue[0] = "asaaass";
     }
 }
