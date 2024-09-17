@@ -16,9 +16,6 @@ contract Storage {
 
 }
 
-interface IERC20 {
-    function name() external view returns (uint256);
-}
 
 contract Erc20 {
     string public name; 
