@@ -1,0 +1,137 @@
+// SPDX-License-Identifier: GPL-3.0
+//sign other mathods and calling other mathods other contracts
+
+pragma solidity ^0.8.0;
+
+library DimondStorage {
+    bytes32 internal constant MY_STORAGE = keccak256("dimond.storage");
+
+    struct Storage {
+        string name;
+        mapping(bytes4 => address) contractAdress;
+        address owner;
+        string fatherName;
+    }
+
+    function getStorage() internal pure returns (Storage storage s) {
+        bytes32 position = MY_STORAGE;
+        assembly {
+            s.slot := position
+        }
+    }
+}
+
+contract Diamond {
+    function registerFunction(bytes4 _sector, address _address) public {
+        DimondStorage.getStorage().contractAdress[_sector] = _address;
+    }
+
+    function checkSlectorRegitertion(bytes4 _sector)
+        public
+        view
+        returns (address)
+    {
+        return DimondStorage.getStorage().contractAdress[_sector];
+    }
+
+    receive() external payable {}
+
+    fallback() external payable {
+        DimondStorage.Storage storage ds;
+        bytes32 position = DimondStorage.MY_STORAGE;
+        // get diamond storage
+        assembly {
+            ds.slot := position
+        }
+        // get facet from function selector
+        address facet = DimondStorage.getStorage().contractAdress[msg.sig];
+        require(facet != address(0), "Diamond: Function does not exist");
+        // Execute external function from facet using delegatecall and return any value.
+        assembly {
+            // copy function selector and any arguments
+            calldatacopy(0, 0, calldatasize())
+            // execute function call using the facet
+            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+            // get any return value
+            returndatacopy(0, 0, returndatasize())
+            // return any return value or error back to the caller
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
+        }
+    }
+}
+
+contract DimondCut {
+    // Function to get the selector of a given function signature
+    function getFunctionSelector(string memory signature)
+        public
+        pure
+        returns (bytes4)
+    {
+         bytes memory functionSectore = abi.encodeWithSignature(signature);
+         return bytes4(functionSectore);
+    }
+
+    // General function to get all selectors from a dynamic array of function signatures
+    function updateSelectores(
+        string[] memory signatures,
+        address _contractAddress
+    ) public {
+        for (uint256 i = 0; i < signatures.length; i++) {
+            bytes4  functionIndex = getFunctionSelector(signatures[i]);
+            DimondStorage.getStorage().contractAdress[functionIndex] = _contractAddress;
+        }
+    }
+
+    function getContractSignatureList() public pure returns (bytes4) {
+        return getFunctionSelector("updateSelectores(string[],address)");
+    }
+}
+
+contract facet1 {
+    // **********************************************************************************************
+    string public functionList =
+        '"setName(string)","getName()","setOwner(address)","getOwner()"';
+
+    // **********************************************************************************************
+    //  0xc47f0027
+    function setName(string memory _name) public {
+        DimondStorage.getStorage().name = _name;
+    }
+
+    // 0x17d7de7c
+    function getName() public view returns (string memory) {
+        return DimondStorage.getStorage().name;
+    }
+
+    function setOwner(address _owner) public {
+        DimondStorage.getStorage().owner = _owner;
+    }
+
+    function getOwner() public view returns (address) {
+        return DimondStorage.getStorage().owner;
+    }
+}
+contract facet2 {
+    // **********************************************************************************************
+    string public functionList =
+        '"setFatherName(string)","getFatherName()"';
+
+    // **********************************************************************************************
+    function setFatherName(string memory _fatherName) public {
+        DimondStorage.getStorage().fatherName = _fatherName;
+    }
+ 
+    function getFatherName() public view returns (string memory) {
+        return DimondStorage.getStorage().fatherName;
+    }
+
+   
+}
+
+ 
